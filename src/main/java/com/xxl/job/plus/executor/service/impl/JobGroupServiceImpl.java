@@ -5,6 +5,7 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.xxl.job.plus.executor.config.XxlJobAutoRegisterConfigProperties;
 import com.xxl.job.plus.executor.model.XxlJobGroup;
 import com.xxl.job.plus.executor.service.JobGroupService;
 import com.xxl.job.plus.executor.service.JobLoginService;
@@ -24,37 +25,40 @@ import java.util.stream.Collectors;
  */
 @Service
 public class JobGroupServiceImpl implements JobGroupService {
-
-    @Value("${xxl.job.admin.addresses}")
-    private String adminAddresses;
-
-    @Value("${xxl.job.executor.appname}")
-    private String appName;
-
-    @Value("${xxl.job.executor.title}")
-    private String title;
-
-    /*
-     * 执行器地址类型：0=自动注册、1=手动录入
-     * */
-    @Value("${xxl.job.executor.addressType:0}")
-    private Integer addressType;
-
-    /*
-     * 执行器地址列表，多地址逗号分隔(手动录入)
-     * */
-    @Value("${xxl.job.executor.addressList:}")
-    private String addressList;
+//
+//    @Value("${xxl.job.admin.addresses}")
+//    private String adminAddresses;
+//
+//    @Value("${xxl.job.executor.appname}")
+//    private String appName;
+//
+//    @Value("${xxl.job.executor.title}")
+//    private String title;
+//
+//    /*
+//     * 执行器地址类型：0=自动注册、1=手动录入
+//     * */
+//    @Value("${xxl.job.executor.addressType:0}")
+//    private Integer addressType;
+//
+//    /*
+//     * 执行器地址列表，多地址逗号分隔(手动录入)
+//     * */
+//    @Value("${xxl.job.executor.addressList:}")
+//    private String addressList;
 
     @Autowired
     private JobLoginService jobLoginService;
 
+    @Autowired
+    private XxlJobAutoRegisterConfigProperties xxlJobAutoRegisterConfigProperties;
+
     @Override
     public List<XxlJobGroup> getJobGroup() {
-        String url=adminAddresses+"/jobgroup/pageList";
+        String url = xxlJobAutoRegisterConfigProperties.getAdmin().getAddresses() + "/jobgroup/pageList";
         HttpResponse response = HttpRequest.post(url)
-                .form("appname", appName)
-                .form("title", title)
+                .form("appname", xxlJobAutoRegisterConfigProperties.getExecutor().getAppName())
+                .form("title", xxlJobAutoRegisterConfigProperties.getExecutor().getTitle())
                 .cookie(jobLoginService.getCookie())
                 .execute();
 
@@ -69,17 +73,17 @@ public class JobGroupServiceImpl implements JobGroupService {
 
     @Override
     public boolean autoRegisterGroup() {
-        String url=adminAddresses+"/jobgroup/save";
+        String url = xxlJobAutoRegisterConfigProperties.getAdmin().getAddresses() + "/jobgroup/save";
         HttpRequest httpRequest = HttpRequest.post(url)
-                .form("appname", appName)
-                .form("title", title);
+                .form("appname", xxlJobAutoRegisterConfigProperties.getExecutor().getAppName())
+                .form("title", xxlJobAutoRegisterConfigProperties.getExecutor().getTitle());
 
-        httpRequest.form("addressType",addressType);
-        if (addressType.equals(1)){
-            if (Strings.isBlank(addressList)){
+        httpRequest.form("addressType", xxlJobAutoRegisterConfigProperties.getExecutor().getAddressType());
+        if (xxlJobAutoRegisterConfigProperties.getExecutor().getAddressType().equals(1)) {
+            if (Strings.isBlank(xxlJobAutoRegisterConfigProperties.getExecutor().getAddressList())) {
                 throw new RuntimeException("手动录入模式下,执行器地址列表不能为空");
             }
-            httpRequest.form("addressList",addressList);
+            httpRequest.form("addressList", xxlJobAutoRegisterConfigProperties.getExecutor().getAddressList());
         }
 
         HttpResponse response = httpRequest.cookie(jobLoginService.getCookie())
@@ -92,10 +96,28 @@ public class JobGroupServiceImpl implements JobGroupService {
     public boolean preciselyCheck() {
         List<XxlJobGroup> jobGroup = getJobGroup();
         Optional<XxlJobGroup> has = jobGroup.stream()
-                .filter(xxlJobGroup -> xxlJobGroup.getAppname().equals(appName)
-                        && xxlJobGroup.getTitle().equals(title))
+                .filter(xxlJobGroup -> xxlJobGroup.getAppname().equals(xxlJobAutoRegisterConfigProperties.getExecutor().getAppName())
+                        && xxlJobGroup.getTitle().equals(xxlJobAutoRegisterConfigProperties.getExecutor().getTitle()))
                 .findAny();
         return has.isPresent();
+    }
+
+    @Override
+    public XxlJobGroup getJobGroup(String appName, String title) {
+        String url = xxlJobAutoRegisterConfigProperties.getAdmin().getAddresses() + "/jobgroup/pageList";
+        HttpResponse response = HttpRequest.post(url)
+                .form("appname", appName)
+                .form("title", title)
+                .cookie(jobLoginService.getCookie())
+                .execute();
+
+        String body = response.body();
+        JSONArray array = JSONUtil.parse(body).getByPath("data", JSONArray.class);
+        List<XxlJobGroup> list = array.stream()
+                .map(o -> JSONUtil.toBean((JSONObject) o, XxlJobGroup.class))
+                .collect(Collectors.toList());
+
+        return !list.isEmpty() ? list.get(0) : null;
     }
 
 }

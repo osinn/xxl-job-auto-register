@@ -1,5 +1,5 @@
 ## xxljob-autoregister-spring-boot-starter
-
+> 在https://github.com/trunks2008/xxl-job-auto-register基础上添加新功能
 **********************************
 
 自动注册xxl-job执行器以及任务
@@ -14,9 +14,15 @@ mvn clean install
 
 ```xml
 <dependency>
-    <groupId>com.cn.hydra</groupId>
-    <artifactId>xxljob-autoregister-spring-boot-starter</artifactId>
+    <groupId>io.github.osinn</groupId>
+    <artifactId>xxl-job-auto-register</artifactId>
     <version>0.0.1</version>
+</dependency>
+
+<dependency>
+    <groupId>cn.hutool</groupId>
+    <artifactId>hutool-all</artifactId>
+    <version>${hutool.version}</version>
 </dependency>
 ```
 
@@ -51,6 +57,26 @@ xxl.job.executor.addressType=1
 # 在上面为1的情况下，手动录入执行器地址列表，多地址逗号分隔
 xxl.job.executor.addressList=http://127.0.0.1:9999
 ```
+- application.yml
+```
+xxl:
+  job:
+    accessToken: default_token
+    admin:
+      addresses: http://127.0.0.1:8080/xxl-job-admin
+      password: 123456
+      username: admin
+    executor:
+      address: ''
+      addressList: http://127.0.0.1:9999
+      addressType: 1
+      appname: xxl-job-executor-test
+      ip: 127.0.0.1
+      logpath: /data/applogs/xxl-job/jobhandler
+      logretentiondays: 30
+      port: 9999
+      title: Exe-Titl
+```
 
 `XxlJobSpringExecutor`参数配置与之前相同
 
@@ -84,3 +110,4 @@ public class TestService {
     }
 }
 ```
+## 5、注入JobInfoService Bean动态管理任务调度

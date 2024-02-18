@@ -12,4 +12,6 @@ public interface JobGroupService {
 
     boolean preciselyCheck();
 
+    XxlJobGroup getJobGroup(String appName, String title);
+
 }
