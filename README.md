@@ -61,6 +61,8 @@ xxl.job.executor.addressList=http://127.0.0.1:9999
 ```
 xxl:
   job:
+    # 启用xxl-job配置，否则需要自行配置注入XxlJobSpringExecutor
+    enable: true
     accessToken: default_token
     admin:
       addresses: http://127.0.0.1:8080/xxl-job-admin
