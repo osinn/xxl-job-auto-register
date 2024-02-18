@@ -21,5 +21,8 @@ public @interface XxlRegister {
      * */
     String executorRouteStrategy() default "ROUND";
 
-    int triggerStatus() default 0;
+    /**
+     * 调度状态：0-停止，1-运行
+     */
+    int triggerStatus() default 1;
 }

@@ -8,6 +8,10 @@
     <artifactId>xxl-job-auto-register</artifactId>
     <version>0.0.1</version>
 
+    <name>xxl-job-auto-register</name>
+    <description>xxl-job-auto-register</description>
+    <url>https://github.com/osinn</url>
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -15,10 +19,17 @@
         </license>
     </licenses>
 
+    <developers>
+        <developer>
+            <name>java客栈的小二</name>
+            <email>osinn@163.com</email>
+        </developer>
+    </developers>
+
     <scm>
-        <connection>scm:git:git@github.com:osinn/robot-message-alert-starter.git</connection>
-        <developerConnection>scm:git:git@github.com:osinn/robot-message-alert-starter.git</developerConnection>
-        <url>git@github.com:osinn/robot-message-alert-starter.git</url>
+        <connection>scm:git:git@github.com:osinn/xxl-job-auto-register.git</connection>
+        <developerConnection>scm:git:git@github.com:osinn/xxl-job-auto-register.git</developerConnection>
+        <url>git@github.com:osinn/xxl-job-auto-register.git</url>
     </scm>
 
     <profiles>

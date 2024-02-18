@@ -88,6 +88,9 @@ public class XxlJobAutoRegister implements ApplicationListener<ApplicationReadyE
 
     private void addJobInfo() {
         List<XxlJobGroup> jobGroups = jobGroupService.getJobGroup();
+        if(jobGroups.isEmpty()) {
+            throw new RuntimeException("check auto register xxl-job group is success!");
+        }
         XxlJobGroup xxlJobGroup = jobGroups.get(0);
 
         String[] beanDefinitionNames = applicationContext.getBeanNamesForType(Object.class, false, true);
