@@ -2,7 +2,9 @@
 > 在https://github.com/trunks2008/xxl-job-auto-register基础上添加新功能
 **********************************
 
-自动注册xxl-job执行器以及任务
+- 自动注册xxl-job执行器以及任务
+- 服务启动获取@XxlRegister参数，如果xxl-job中不存在任务，则自动注册，如果已存在，则根据变化做更新
+- 加入redisson 可配置是否开启分布式锁自动注册
 
 ## 1、打包
 
@@ -63,6 +65,8 @@ xxl:
   job:
     # 启用xxl-job配置，否则需要自行配置注入XxlJobSpringExecutor
     enable: true
+    # 是否启用分布式锁住自动配置，避免多台服务器并发自动注册，依赖 redisson
+    enabled-distributed-lock: true
     accessToken: default_token
     admin:
       addresses: http://127.0.0.1:8080/xxl-job-admin
@@ -70,12 +74,12 @@ xxl:
       username: admin
     executor:
       address: ''
-      addressList: http://127.0.0.1:9999
+      address-list: http://127.0.0.1:9999
       addressType: 1
-      appname: xxl-job-executor-test
+      app-name: xxl-job-executor-test
       ip: 127.0.0.1
-      logpath: /data/applogs/xxl-job/jobhandler
-      logretentiondays: 30
+      log-path: /data/applogs/xxl-job/jobhandler
+      log-retention-days: 30
       port: 9999
       title: Exe-Titl
 ```
