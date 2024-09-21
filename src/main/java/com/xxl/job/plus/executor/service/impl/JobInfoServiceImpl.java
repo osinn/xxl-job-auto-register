@@ -1,21 +1,21 @@
 package com.xxl.job.plus.executor.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.convert.Convert;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
-import cn.hutool.json.JSON;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import cn.hutool.log.Log;
-import cn.hutool.log.LogFactory;
+import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.plus.executor.model.XxlJobGroup;
 import com.xxl.job.plus.executor.model.XxlJobInfo;
 import com.xxl.job.plus.executor.model.XxlRegisterModel;
 import com.xxl.job.plus.executor.service.JobGroupService;
 import com.xxl.job.plus.executor.service.JobInfoService;
 import com.xxl.job.plus.executor.service.JobLoginService;
+import com.xxl.job.plus.executor.utils.JacksonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Service
 public class JobInfoServiceImpl implements JobInfoService {
 
-    private static final Log log = LogFactory.get();
+    private static Logger log = LoggerFactory.getLogger(JobInfoServiceImpl.class);
 
     @Value("${xxl.job.admin.addresses}")
     private String adminAddresses;
@@ -54,48 +54,36 @@ public class JobInfoServiceImpl implements JobInfoService {
 
         String body = response.body();
         JSONArray array = JSONUtil.parse(body).getByPath("data", JSONArray.class);
-        List<XxlJobInfo> list = array.stream()
+        return array.stream()
                 .map(o -> JSONUtil.toBean((JSONObject) o, XxlJobInfo.class))
                 .collect(Collectors.toList());
-
-        return list;
     }
 
     @Override
-    public Integer addJobInfo(XxlJobInfo xxlJobInfo) {
+    public <T> ReturnT<T> addJobInfo(XxlJobInfo xxlJobInfo) {
         String url = adminAddresses + "/jobinfo/add";
         Map<String, Object> paramMap = BeanUtil.beanToMap(xxlJobInfo);
         HttpResponse response = HttpRequest.post(url)
                 .form(paramMap)
                 .cookie(jobLoginService.getCookie())
                 .execute();
-        String body = response.body();
-        JSON json = JSONUtil.parse(response.body());
-        Object code = json.getByPath("code");
-        if (code.equals(200)) {
-            return Convert.toInt(json.getByPath("content"));
-        }
-        throw new RuntimeException("add jobInfo error! ======>" + body);
+        return JacksonUtil.readValue(response.body(), ReturnT.class);
     }
 
     @Override
-    public void update(XxlJobInfo xxlJobInfo) {
+    public <T> ReturnT<T> update(XxlJobInfo xxlJobInfo) {
         String url = adminAddresses + "/jobinfo/update";
         Map<String, Object> paramMap = BeanUtil.beanToMap(xxlJobInfo);
         HttpResponse response = HttpRequest.post(url)
                 .form(paramMap)
                 .cookie(jobLoginService.getCookie())
                 .execute();
-        String body = response.body();
-        JSON json = JSONUtil.parse(response.body());
-        Object code = json.getByPath("code");
-        if (!code.equals(200)) {
-            throw new RuntimeException("update jobInfo error! =====>" + body);
-        }
+
+        return JacksonUtil.readValue(response.body(), ReturnT.class);
     }
 
     @Override
-    public void start(int id) {
+    public <T> ReturnT<T> start(int id) {
         String url = adminAddresses + "/jobinfo/start";
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("id", id);
@@ -103,16 +91,11 @@ public class JobInfoServiceImpl implements JobInfoService {
                 .form(paramMap)
                 .cookie(jobLoginService.getCookie())
                 .execute();
-        String body = response.body();
-        JSON json = JSONUtil.parse(response.body());
-        Object code = json.getByPath("code");
-        if (!code.equals(200)) {
-            throw new RuntimeException("update jobInfo error! =====>" + body);
-        }
+        return JacksonUtil.readValue(response.body(), ReturnT.class);
     }
 
     @Override
-    public void stop(int id) {
+    public <T> ReturnT<T> stop(int id) {
         String url = adminAddresses + "/jobinfo/stop";
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("id", id);
@@ -120,16 +103,11 @@ public class JobInfoServiceImpl implements JobInfoService {
                 .form(paramMap)
                 .cookie(jobLoginService.getCookie())
                 .execute();
-        String body = response.body();
-        JSON json = JSONUtil.parse(response.body());
-        Object code = json.getByPath("code");
-        if (!code.equals(200)) {
-            throw new RuntimeException("update jobInfo error! =====>" + body);
-        }
+        return JacksonUtil.readValue(response.body(), ReturnT.class);
     }
 
     @Override
-    public void remove(int id) {
+    public <T> ReturnT<T> remove(int id) {
         this.stop(id);
         String url = adminAddresses + "/jobinfo/remove";
         Map<String, Object> paramMap = new HashMap<>();
@@ -138,12 +116,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 .form(paramMap)
                 .cookie(jobLoginService.getCookie())
                 .execute();
-        String body = response.body();
-        JSON json = JSONUtil.parse(response.body());
-        Object code = json.getByPath("code");
-        if (!code.equals(200)) {
-            throw new RuntimeException("update jobInfo error! =====>" + body);
-        }
+        return JacksonUtil.readValue(response.body(), ReturnT.class);
     }
 
     @Override
@@ -178,20 +151,25 @@ public class JobInfoServiceImpl implements JobInfoService {
         }
 
         for (XxlJobInfo xxlJobInfo : xxlJobInfoList) {
-            Integer id = this.addJobInfo(xxlJobInfo);
-            xxlJobInfo.setId(id);
+            ReturnT<Object> returnT = this.addJobInfo(xxlJobInfo);
+            if (returnT.getCode() != 200) {
+                throw new RuntimeException(String.format("add jobInfo [%s]error! msg ======> %s", returnT.getCode(), returnT.getMsg()));
+            }
+            xxlJobInfo.setId(Integer.parseInt(returnT.getContent().toString()));
         }
         return xxlJobInfoList;
     }
 
     private XxlJobInfo createXxlJobInfo(XxlRegisterModel xxlRegisterModel, XxlJobGroup jobGroup) {
         List<XxlJobInfo> jobInfo = this.getJobInfo(jobGroup.getId(), xxlRegisterModel.getExecutorHandler());
-        Optional<XxlJobInfo> first = jobInfo.stream()
-                .filter(xxlJobInfo -> xxlJobInfo.getExecutorHandler().equals(xxlRegisterModel.getExecutorHandler()))
-                .findFirst();
-        if (first.isPresent()) {
-            log.warn(jobGroup.getAppname() + "<--->" + jobGroup.getTitle() + "<--->" + xxlRegisterModel.getExecutorHandler() + " skipping exists");
-            return null;
+        if (xxlRegisterModel.isSkippingExist()) {
+            Optional<XxlJobInfo> first = jobInfo.stream()
+                    .filter(xxlJobInfo -> xxlJobInfo.getExecutorHandler().equals(xxlRegisterModel.getExecutorHandler()))
+                    .findFirst();
+            if (first.isPresent()) {
+                log.warn(jobGroup.getAppname() + "<--->" + jobGroup.getTitle() + "<--->" + xxlRegisterModel.getExecutorHandler() + " skipping exists");
+                return null;
+            }
         }
 
         XxlJobInfo xxlJobInfo = new XxlJobInfo();

@@ -3,6 +3,7 @@ package com.xxl.job.plus.executor.core;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import com.xxl.job.plus.executor.annotation.XxlRegister;
 import com.xxl.job.plus.executor.config.XxlJobAutoRegisterConfigProperties;
@@ -88,7 +89,7 @@ public class XxlJobAutoRegister implements ApplicationListener<ApplicationReadyE
 
     private void addJobInfo() {
         List<XxlJobGroup> jobGroups = jobGroupService.getJobGroup();
-        if(jobGroups.isEmpty()) {
+        if (jobGroups.isEmpty()) {
             throw new RuntimeException("check auto register xxl-job group is success!");
         }
         XxlJobGroup xxlJobGroup = jobGroups.get(0);
@@ -126,7 +127,10 @@ public class XxlJobAutoRegister implements ApplicationListener<ApplicationReadyE
                     }
 
 
-                    Integer jobInfoId = jobInfoService.addJobInfo(registerXxlJobInfo);
+                    ReturnT<Object> result = jobInfoService.addJobInfo(registerXxlJobInfo);
+                    if (result.getCode() != ReturnT.SUCCESS_CODE) {
+                        throw new RuntimeException(String.format("add jobInfo [%s]error! msg ======> %s", result.getCode(), result.getMsg()));
+                    }
                 }
             }
         }

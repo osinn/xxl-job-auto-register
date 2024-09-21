@@ -1,7 +1,5 @@
 package com.xxl.job.plus.executor.model;
 
-import java.util.Objects;
-
 /**
  * 服务接口注册参数
  *
@@ -48,6 +46,11 @@ public class XxlRegisterModel {
      * 执行器，任务参数
      */
     private String executorParam;
+
+    /**
+     * 如果已经存在，是否跳过注册
+     */
+    private boolean skippingExist;
 
     public String getCron() {
         return cron;
@@ -121,16 +124,13 @@ public class XxlRegisterModel {
         this.executorParam = executorParam;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        XxlRegisterModel that = (XxlRegisterModel) o;
-        return triggerStatus == that.triggerStatus && Objects.equals(cron, that.cron) && Objects.equals(jobDesc, that.jobDesc) && Objects.equals(author, that.author) && Objects.equals(executorRouteStrategy, that.executorRouteStrategy) && Objects.equals(executorHandler, that.executorHandler) && Objects.equals(executorTitle, that.executorTitle) && Objects.equals(appName, that.appName) && Objects.equals(executorParam, that.executorParam);
+    public boolean isSkippingExist() {
+        return skippingExist;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(cron, jobDesc, author, executorRouteStrategy, triggerStatus, executorHandler, executorTitle, appName, executorParam);
+    public void setSkippingExist(boolean skippingExist) {
+        this.skippingExist = skippingExist;
     }
+
+
 }

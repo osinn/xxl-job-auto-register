@@ -6,7 +6,7 @@
 
     <groupId>io.github.osinn</groupId>
     <artifactId>xxl-job-auto-register</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 
     <name>xxl-job-auto-register</name>
     <description>xxl-job-auto-register</description>
@@ -46,9 +46,9 @@
 
     <properties>
         <java.version>8</java.version>
-        <xxl-job.version>2.4.0</xxl-job.version>
+        <xxl-job.version>2.4.1</xxl-job.version>
         <spring-boot.version>2.6.7</spring-boot.version>
-        <hutool.version>5.8.25</hutool.version>
+        <hutool.version>5.8.31</hutool.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
