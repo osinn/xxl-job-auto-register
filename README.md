@@ -6,19 +6,13 @@
 - 服务启动获取@XxlRegister参数，如果xxl-job中不存在任务，则自动注册，如果已存在，则根据变化做更新
 - 加入redisson 可配置是否开启分布式锁自动注册
 
-## 1、打包
-
-```
-mvn clean install
-```
-
 ## 2、项目中引入
 
 ```xml
 <dependency>
     <groupId>io.github.osinn</groupId>
     <artifactId>xxl-job-auto-register</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 </dependency>
 
 <dependency>
